@@ -92,7 +92,6 @@ export default class Page extends Component {
       <div>
         <Head>
           <title>Covid-19 deaths in The United States of America</title>
-          <meta name="viewport" content="width=600"></meta>
         </Head>
         <div className="info">
           <h1>COVID19 DEATHS</h1>
