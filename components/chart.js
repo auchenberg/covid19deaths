@@ -132,7 +132,7 @@ export class Chart extends Component {
       .style("fill", "none");
 
     // Election day
-    let dateElection = x(moment("11-03-2020"));
+    let dateElection = x(moment("2020-11-03"));
     g.append("line")
       .attr("x1", dateElection)
       .attr("y1", -50)
