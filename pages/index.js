@@ -14,32 +14,41 @@ export default class Page extends Component {
         death: 2977,
       },
       {
+        name: "2009 H1N1 Pandemic",
+        death: 12469, // https://www.cdc.gov/flu/pandemic-resources/2009-h1n1-pandemic.html
+      },
+      {
         name: "Korean War",
-        death: 36574,
+        death: 36516, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
       },
       {
         name: "Vietnam War",
-        death: 58220,
+        death: 58209, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
       },
       {
-        name: "1968 flu pandemic",
-        death: 100000,
+        name: "1968 Pandemic (H3N2 virus)",
+        death: 100000, // https://www.cdc.gov/flu/pandemic-resources/1957-1958-pandemic.html
       },
       {
         name: "World War I",
-        death: 116516,
+        death: 116516, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
+      },
+      {
+        name: "Civil War - U.S. Army",
+        death: 364511, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
+      },
+      {
+        name: "Civil War - Confederate Army",
+        death: 290000, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
       },
       {
         name: "World War II",
-        death: 405399,
+        death: 405399, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
       },
+
       {
-        name: "Civil War",
-        death: 620000,
-      },
-      {
-        name: "1918 flu pandemic",
-        death: 675000,
+        name: "1918 Pandemic (H1N1 virus)",
+        death: 675000, // https://www.cdc.gov/flu/pandemic-resources/1918-pandemic-h1n1.html
       },
       {
         name: "AIDS",
@@ -99,6 +108,11 @@ export default class Page extends Component {
 
           <p>
             Last updated on <strong>{formattedDate}</strong>.
+          </p>
+
+          <p className="small">
+            Data from{" "}
+            <a href="https://covidtracking.com/">The COVID tracking project</a>.
           </p>
 
           <p className="small">
