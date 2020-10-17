@@ -1,65 +1,104 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import React, { Component } from "react";
+import { Chart } from "../components/chart";
+import * as d3 from "d3";
+import * as d3Time from "d3-time-format";
+import moment from "moment";
 
-export default function Home() {
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+export default class Page extends Component {
+  state = {
+    data: null,
+    milestones: [
+      {
+        name: "9/11 terrorist attacks",
+        death: 2977,
+      },
+      {
+        name: "Korean War",
+        death: 36574,
+      },
+      {
+        name: "Vietnam War",
+        death: 58220,
+      },
+      {
+        name: "1968 flu pandemic",
+        death: 100000,
+      },
+      {
+        name: "World War I",
+        death: 116516,
+      },
+      {
+        name: "World War II",
+        death: 405399,
+      },
+      {
+        name: "Civil War",
+        death: 620000,
+      },
+      {
+        name: "1918 flu pandemic",
+        death: 675000,
+      },
+      {
+        name: "AIDS",
+        death: 700000,
+      },
+    ],
+  };
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+  componentDidMount() {
+    this.fetchData();
+  }
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
+  fetchData() {
+    d3.json("https://api.covidtracking.com/v1/us/daily.json").then((data) => {
+      // Format data
+      var parseDate = d3.timeParse("%Y%m%d"); // Json is formatted like 20201016
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
+      data.forEach(function (d) {
+        d.date = parseDate(d.date);
+      });
 
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
+      let mostRecentItem = data.slice(0)[0];
 
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
+      this.setState({
+        data: data,
+        mostRecent: mostRecentItem,
+      });
+    });
+  }
 
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+  render() {
+    let formattedDeathCount = this.state.mostRecent
+      ? new Intl.NumberFormat().format(this.state.mostRecent.death)
+      : 0;
+
+    let formattedDate = this.state.mostRecent
+      ? moment(this.state.mostRecent.date).format(`dddd, MMMM Do YYYY`)
+      : "";
+
+    return (
+      <div>
+        <div className="info">
+          <h1>COVID19 DEATHS</h1>
+          <p>
+            The United States of America have to date had{" "}
+            <strong>{formattedDeathCount}</strong> dealths due to COVID-19.
+          </p>
+          <p>
+            This websites is visualized of what the COVID deaths are comparible
+            too.
+          </p>
+          <p>
+            Last updated on: <strong>{formattedDate}</strong>
+          </p>
         </div>
-      </main>
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+        <div className="chart-wrapper">
+          <Chart data={this.state.data} milestones={this.state.milestones} />
+        </div>
+      </div>
+    );
+  }
 }

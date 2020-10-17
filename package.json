@@ -8,6 +8,10 @@
     "start": "next start"
   },
   "dependencies": {
+    "d3": "^6.2.0",
+    "d3-fetch": "^2.0.0",
+    "d3-time-format": "^3.0.0",
+    "moment": "^2.29.1",
     "next": "9.5.5",
     "react": "16.14.0",
     "react-dom": "16.14.0"
