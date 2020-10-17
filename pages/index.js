@@ -3,6 +3,7 @@ import { Chart } from "../components/chart";
 import * as d3 from "d3";
 import * as d3Time from "d3-time-format";
 import moment from "moment";
+import Head from "next/head";
 
 export default class Page extends Component {
   state = {
@@ -80,18 +81,25 @@ export default class Page extends Component {
 
     return (
       <div>
+        <Head>
+          <title>Covid-19 deaths in The United States of America</title>
+        </Head>
         <div className="info">
           <h1>COVID19 DEATHS</h1>
           <p>
-            The United States of America have to date had{" "}
+            The United States of America have had{" "}
             <strong>{formattedDeathCount}</strong> dealths due to COVID-19.
           </p>
           <p>
-            This websites is visualized of what the COVID deaths are comparible
-            too.
+            This is a visualization of what the COVID deaths are comparible too.
           </p>
           <p>
             Last updated on: <strong>{formattedDate}</strong>
+          </p>
+
+          <p className="small">
+            Created by{" "}
+            <a href="https://twitter.com/auchenberg">Kenneth Auchenberg</a>.
           </p>
         </div>
 
