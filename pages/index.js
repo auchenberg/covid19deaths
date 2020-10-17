@@ -97,13 +97,13 @@ export default class Page extends Component {
         <div className="info">
           <h1>COVID19 DEATHS</h1>
           <p>
-            A visualization of how COVID-19 deaths compares to other deadly
+            A visualization of how COVID-19 deaths compare to other deadly
             events from American history.
           </p>
 
           <p>
-            The United States of America have so far had{" "}
-            <strong>{formattedDeathCount}</strong> dealths due to COVID-19.
+            The United States of America has so far had{" "}
+            <strong>{formattedDeathCount}</strong> deaths due to COVID-19.
           </p>
 
           <p>
