@@ -199,6 +199,16 @@ export class Chart extends Component {
         .attr("opacity", 0.4)
         .style("stroke", "#000")
         .style("fill", "none");
+
+      // let currentMax = d3.max(data, function (d) {
+      //   return d.death;
+      // });
+
+      g.append("circle")
+        .attr("cx", 0)
+        .attr("cy", y(m.death))
+        .attr("r", 3)
+        .style("fill", "#ff5722");
     });
   }
 
