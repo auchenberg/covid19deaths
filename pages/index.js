@@ -10,10 +10,6 @@ export default class Page extends Component {
     data: null,
     milestones: [
       {
-        name: "9/11 terrorist attacks (1 day)",
-        death: 2977,
-      },
-      {
         name: "2009 H1N1 Pandemic (1 year)",
         death: 12469, // https://www.cdc.gov/flu/pandemic-resources/2009-h1n1-pandemic.html
       },
