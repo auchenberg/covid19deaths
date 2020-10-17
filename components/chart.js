@@ -31,6 +31,7 @@ export class Chart extends Component {
     const width = this.state.width;
     const data = this.props.data;
     const milestones = this.props.milestones;
+    const isMobile = width < 600;
 
     if (!data) {
       return;
@@ -49,12 +50,15 @@ export class Chart extends Component {
       .nice();
 
     g.append("g")
+      .attr("class", "axis-x")
       .attr("opacity", 0.75)
       .attr("transform", "translate(0," + height + ")")
       .style("font-family", "Roboto, Helvetica, sans-serif")
       .call(
         d3.axisTop(x).tickFormat(function (d) {
-          return moment(d).format("MMM YYYY");
+          return isMobile
+            ? moment(d).format("MMM")
+            : moment(d).format("MMM YYYY");
         })
       )
       .style("font-size", "12px");
@@ -64,7 +68,7 @@ export class Chart extends Component {
       return d.death;
     });
 
-    let scaleMax = currentMax * 2;
+    let scaleMax = currentMax * 1.5;
     var y = d3.scaleLinear().domain([0, scaleMax]).rangeRound([height, 0]);
 
     var format = d3.format(",");
@@ -170,9 +174,11 @@ export class Chart extends Component {
 
     // Draw milestones
 
+    let milestoneLeftMargin = isMobile ? 20 : 60;
+
     milestones.forEach((m) => {
       g.append("text")
-        .attr("x", 60)
+        .attr("x", milestoneLeftMargin)
         .attr("dx", 0)
         .attr("y", y(m.death))
         .attr("dy", -5)
@@ -199,7 +205,7 @@ export class Chart extends Component {
   render() {
     return (
       <div className="chart" ref={this.myRef}>
-        <svg />
+        <svg></svg>
       </div>
     );
   }
