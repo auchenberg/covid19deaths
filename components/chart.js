@@ -2,11 +2,14 @@ import React, { Component } from "react";
 import moment from "moment";
 import * as d3 from "d3";
 import * as d3Time from "d3-time-format";
+import { axisRight } from "d3";
 
 export class Chart extends Component {
   constructor(props) {
     super(props);
     this.myRef = React.createRef();
+    this.scaleY = null;
+    this.scaleYMaxBound = 2000;
   }
 
   componentDidMount() {
@@ -19,11 +22,95 @@ export class Chart extends Component {
   }
 
   componentDidUpdate() {
-    this.drawChart();
+    this.draw();
   }
 
   updateDimensions() {
     this.setState({ width: window.innerWidth, height: window.innerHeight });
+  }
+
+  changeYscale(maxScaleBound) {
+    var format = d3.format(",");
+
+    this.scaleYMaxBound = maxScaleBound;
+
+    this.scaleY = d3
+      .scaleLinear()
+      .domain([0, maxScaleBound])
+      .rangeRound([this.state.height, 0]);
+    this.elmAxisY
+      .transition()
+      .duration(500)
+      .call(
+        d3.axisLeft(this.scaleY).tickFormat(function (d) {
+          return format(d);
+        })
+      );
+  }
+
+  drawYscale(g) {
+    // Grab y axis g element
+    this.elmAxisY = g
+      .append("g")
+      .attr("id", "axis-y")
+      .attr("opacity", 0.75)
+      .attr("transform", "translate(" + this.state.width + ", 0)")
+      .style("font-size", "12px")
+      .style("font-family", "Roboto, Helvetica, sans-serif");
+
+    this.changeYscale(this.scaleYMaxBound);
+  }
+
+  drawXscale(g) {
+    const isMobile = this.state.width < 600;
+
+    this.scaleX = d3
+      .scaleTime()
+      .domain([new Date(2020, 1, 1), moment().add(3, "months")])
+      .rangeRound([0, this.state.width])
+      .nice();
+
+    g.append("g")
+      .attr("class", "axis-x")
+      .attr("opacity", 0.75)
+      .attr("transform", "translate(0," + this.state.height + ")")
+      .style("font-family", "Roboto, Helvetica, sans-serif")
+      .transition()
+      .duration(500)
+      .call(
+        d3.axisTop(this.scaleX).tickFormat(function (d) {
+          return isMobile
+            ? moment(d).format("MMM")
+            : moment(d).format("MMM YYYY");
+        })
+      )
+      .style("font-size", "12px");
+  }
+
+  draw() {
+    if (!this.props.data) {
+      return;
+    }
+
+    this.scaleYMaxBound = d3.max(this.props.data, (d) => d.death) * 1.5;
+    this.drawChart();
+
+    // setTimeout(() => {
+    //   this.changeYscale(80000);
+    //   this.drawChart();
+    // }, 2000);
+
+    // setTimeout(() => {
+    //   this.changeYscale(100000);
+    //   this.drawChart();
+    // }, 4000);
+
+    // setTimeout(() => {
+    //   let currentMax = d3.max(this.props.data, (d) => d.death);
+
+    //   this.changeYscale(currentMax);
+    //   this.drawChart();
+    // }, 6000);
   }
 
   drawChart() {
@@ -33,111 +120,87 @@ export class Chart extends Component {
     const milestones = this.props.milestones;
     const isMobile = width < 600;
 
-    if (!data) {
-      return;
-    }
-
     const svg = d3.select(this.myRef.current).select("svg");
-    svg.selectAll("*").remove();
 
     let g = svg.append("g");
 
-    // Draw X scale
-    var x = d3
-      .scaleTime()
-      .domain([new Date(2020, 1, 1), moment().add(3, "months")])
-      .rangeRound([0, width])
-      .nice();
+    this.drawXscale(g);
+    this.drawYscale(g);
 
-    g.append("g")
-      .attr("class", "axis-x")
-      .attr("opacity", 0.75)
-      .attr("transform", "translate(0," + height + ")")
-      .style("font-family", "Roboto, Helvetica, sans-serif")
-      .call(
-        d3.axisTop(x).tickFormat(function (d) {
-          return isMobile
-            ? moment(d).format("MMM")
-            : moment(d).format("MMM YYYY");
-        })
-      )
-      .style("font-size", "12px");
+    this.drawLine(g, data);
+    this.drawArea(g, data);
 
-    // Draw Y scale
-    let currentMax = d3.max(data, function (d) {
-      return d.death;
-    });
+    this.drawTodayLine(g, height);
+    this.drawElectionLine(g, height);
 
-    let scaleMax = currentMax * 1.5;
-    var y = d3.scaleLinear().domain([0, scaleMax]).rangeRound([height, 0]);
-
-    var format = d3.format(",");
-    g.append("g")
-      .attr("opacity", 0.75)
-      .attr("transform", "translate(" + width + ", 0)")
-      .style("font-size", "12px")
-      .style("font-family", "Roboto, Helvetica, sans-serif")
-      .call(
-        d3.axisLeft(y).tickFormat(function (d) {
-          return format(d);
-        })
-      );
-
-    // Draw chart line
+    this.drawMilestones(isMobile, milestones, g);
+  }
+  drawLine(g, data) {
     var line = d3
       .line()
-      .x(function (d) {
-        return x(d.date);
+      .x((d) => {
+        return this.scaleX(d.date);
       })
-      .y(function (d) {
-        return y(d.death);
+      .y((d) => {
+        return this.scaleY(d.death);
       });
 
     g.append("path")
       .datum(data)
+      .transition()
+      .duration(500)
       .attr("fill", "none")
       .attr("stroke", "#cf1110")
       .attr("stroke-linejoin", "round")
       .attr("stroke-linecap", "round")
       .attr("stroke-width", 3)
       .attr("d", line);
+  }
 
-    // Draw area
-    var area = d3
-      .area()
-      .x(function (d) {
-        return x(d.date);
-      })
-      .y0(function (d) {
-        return y(0);
-      })
-      .y1(function (d) {
-        return y(d.death);
-      });
-    g.append("path")
-      .datum(data)
-      .attr("fill", "#fbe9e7")
-      .attr("opacity", 0.5)
-      .attr("stroke-linejoin", "round")
-      .attr("stroke-linecap", "round")
-      .attr("stroke-width", 7)
-      .attr("d", area);
+  drawMilestones(isMobile, milestones, g) {
+    let milestoneLeftMargin = isMobile ? 20 : 60;
 
-    // Draw today line
-    let dateToday = x(moment().seconds(0).minutes(0).hours(0));
+    milestones.forEach((m) => {
+      g.append("text")
+        .transition()
+        .duration(500)
+        .attr("x", milestoneLeftMargin)
+        .attr("dx", 0)
+        .attr("y", this.scaleY(m.death))
+        .attr("dy", -5)
+        .attr("opacity", 0.4)
+        .attr("fill", "#000")
+        .attr("text-anchor", "left")
+        .style("font-size", "12px")
+        .style("font-family", "Roboto, Helvetica, sans-serif")
+        .text(m.name);
+
+      g.append("line")
+        .transition()
+        .duration(500)
+        .attr("x1", 0)
+        .attr("x2", this.scaleX(this.scaleX.domain()[1]))
+        .attr("y1", this.scaleY(m.death))
+        .attr("y2", this.scaleY(m.death))
+        .style("stroke-dasharray", "2, 3")
+        .style("stroke-width", 0.5)
+        .attr("opacity", 0.4)
+        .style("stroke", "#000")
+        .style("fill", "none");
+
+      g.append("circle")
+        .attr("cx", 0)
+        .attr("cy", this.scaleY(m.death))
+        .attr("r", 3)
+        .style("fill", "#ff5722");
+    });
+  }
+
+  drawElectionLine(g, height) {
+    let dateElection = this.scaleX(moment("2020-11-03"));
     g.append("line")
-      .attr("x1", dateToday)
-      .attr("y1", -50)
-      .attr("x2", dateToday)
-      .attr("y2", height)
-      .style("stroke-dasharray", "3, 3")
-      .style("stroke-width", 1.5)
-      .style("stroke", "#ff5722")
-      .style("fill", "none");
-
-    // Election day
-    let dateElection = x(moment("2020-11-03"));
-    g.append("line")
+      .transition()
+      .duration(500)
       .attr("x1", dateElection)
       .attr("y1", -50)
       .attr("x2", dateElection)
@@ -149,6 +212,8 @@ export class Chart extends Component {
       .style("fill", "none");
 
     g.append("line")
+      .transition()
+      .duration(500)
       .attr("x1", dateElection)
       .attr("y1", height / 2 + 60)
       .attr("x2", dateElection)
@@ -160,6 +225,7 @@ export class Chart extends Component {
       .style("fill", "none");
 
     g.append("text")
+
       .attr("x", dateElection)
       .attr("dx", 0)
       .attr("y", height / 2)
@@ -171,45 +237,45 @@ export class Chart extends Component {
       .style("font-size", "12px")
       .style("font-family", "Roboto, Helvetica, sans-serif")
       .text("US Election 2020");
+  }
 
-    // Draw milestones
+  drawTodayLine(g, height) {
+    let dateToday = this.scaleX(moment().seconds(0).minutes(0).hours(0));
+    g.append("line")
+      .transition()
+      .duration(500)
+      .attr("x1", dateToday)
+      .attr("y1", -50)
+      .attr("x2", dateToday)
+      .attr("y2", height)
+      .style("stroke-dasharray", "3, 3")
+      .style("stroke-width", 1.5)
+      .style("stroke", "#ff5722")
+      .style("fill", "none");
+  }
 
-    let milestoneLeftMargin = isMobile ? 20 : 60;
-
-    milestones.forEach((m) => {
-      g.append("text")
-        .attr("x", milestoneLeftMargin)
-        .attr("dx", 0)
-        .attr("y", y(m.death))
-        .attr("dy", -5)
-        .attr("opacity", 0.4)
-        .attr("fill", "#000")
-        .attr("text-anchor", "left")
-        .style("font-size", "12px")
-        .style("font-family", "Roboto, Helvetica, sans-serif")
-        .text(m.name);
-
-      g.append("line")
-        .attr("x1", 0)
-        .attr("x2", x(x.domain()[1]))
-        .attr("y1", y(m.death))
-        .attr("y2", y(m.death))
-        .style("stroke-dasharray", "2, 3")
-        .style("stroke-width", 0.5)
-        .attr("opacity", 0.4)
-        .style("stroke", "#000")
-        .style("fill", "none");
-
-      // let currentMax = d3.max(data, function (d) {
-      //   return d.death;
-      // });
-
-      g.append("circle")
-        .attr("cx", 0)
-        .attr("cy", y(m.death))
-        .attr("r", 3)
-        .style("fill", "#ff5722");
-    });
+  drawArea(g, data) {
+    var area = d3
+      .area()
+      .x((d) => {
+        return this.scaleX(d.date);
+      })
+      .y0((d) => {
+        return this.scaleY(0);
+      })
+      .y1((d) => {
+        return this.scaleY(d.death);
+      });
+    g.append("path")
+      .datum(data)
+      .transition()
+      .duration(500)
+      .attr("fill", "#fbe9e7")
+      .attr("opacity", 0.5)
+      .attr("stroke-linejoin", "round")
+      .attr("stroke-linecap", "round")
+      .attr("stroke-width", 7)
+      .attr("d", area);
   }
 
   render() {
