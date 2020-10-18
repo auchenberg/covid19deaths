@@ -4,6 +4,7 @@ import * as d3 from "d3";
 import * as d3Time from "d3-time-format";
 import moment from "moment";
 import Head from "next/head";
+import Loader from "../components/loader";
 
 export default class Page extends Component {
   state = {
@@ -95,25 +96,34 @@ export default class Page extends Component {
             A visualization of how COVID-19 deaths compare to other deadly
             events from American history.
           </p>
-
-          <p>
-            The United States of America has so far had{" "}
-            <strong>{formattedDeathCount}</strong> deaths due to COVID-19.
-          </p>
-
-          <p>
-            Last updated on <strong>{formattedDate}</strong>.
-          </p>
-
-          <p className="small">
-            Data from{" "}
-            <a href="https://covidtracking.com/">The COVID tracking project</a>.
-          </p>
-
-          <p className="small">
-            Created by{" "}
-            <a href="https://twitter.com/auchenberg">Kenneth Auchenberg</a>.
-          </p>
+          <div>
+            {this.state.data && (
+              <>
+                <p>
+                  The United States of America has so far had{" "}
+                  <strong>{formattedDeathCount}</strong> deaths due to COVID-19.
+                </p>
+                <p>
+                  Last updated on <strong>{formattedDate}</strong>.
+                </p>
+                <p className="small">
+                  Data from{" "}
+                  <a href="https://covidtracking.com/">
+                    The COVID tracking project
+                  </a>
+                  .
+                </p>
+                <p className="small">
+                  Created by{" "}
+                  <a href="https://twitter.com/auchenberg">
+                    Kenneth Auchenberg
+                  </a>
+                  .
+                </p>
+              </>
+            )}
+            {!this.state.data && <Loader />}
+          </div>
         </div>
 
         <div className="chart-wrapper">

@@ -40,7 +40,7 @@ export class Chart extends Component {
     const svg = d3.select(this.myRef.current).select("svg");
     svg.selectAll("*").remove();
 
-    let g = svg.append("g").attr("transform", "translate(" + 0 + "," + 0 + ")");
+    let g = svg.append("g");
 
     // Draw X scale
     var x = d3
