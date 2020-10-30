@@ -9,7 +9,7 @@ export class Chart extends Component {
     super(props);
     this.myRef = React.createRef();
     this.scaleY = null;
-    this.scaleYMaxBound = 2000;
+    this.scaleYMaxBound = 10000;
     this.elmMilestones = [];
   }
 
@@ -33,6 +33,8 @@ export class Chart extends Component {
   changeYscale(maxScaleBound) {
     var format = d3.format(",");
 
+    console.log("changeYscale", maxScaleBound);
+
     this.scaleYMaxBound = maxScaleBound;
 
     this.scaleY = d3
@@ -51,8 +53,6 @@ export class Chart extends Component {
   }
 
   drawYscale(g) {
-    // Grab y axis g element
-
     if (!this.elmAxisY) {
       this.elmAxisY = g
         .append("g")
@@ -67,14 +67,16 @@ export class Chart extends Component {
     this.changeYscale(this.scaleYMaxBound);
   }
 
-  drawXscale(g) {
-    const isMobile = this.state.width < 600;
-
+  updateXscale(maxScaleBound) {
     this.scaleX = d3
       .scaleTime()
-      .domain([new Date(2020, 1, 1), moment().add(3, "months")])
+      .domain([new Date(2020, 1, 1), maxScaleBound])
       .rangeRound([0, this.state.width])
       .nice();
+  }
+
+  drawXscale(g) {
+    const isMobile = this.state.width < 600;
 
     if (!this.elmAxisX) {
       this.elmAxisX = g
@@ -92,8 +94,8 @@ export class Chart extends Component {
       .call(
         d3.axisTop(this.scaleX).tickFormat(function (d) {
           return isMobile
-            ? moment(d).format("MMM")
-            : moment(d).format("MMM YYYY");
+            ? moment(d).format("MMM DD")
+            : moment(d).format("MMM DD YYYY");
         })
       );
   }
@@ -103,18 +105,37 @@ export class Chart extends Component {
       return;
     }
 
-    let maxScaleValue = d3.max(this.props.data, (d) => d.death) * 1.5;
-    let intervalCount = Math.round(maxScaleValue / 20000);
+    let dateStart = moment(new Date(2020, 1, 1));
+    let dateFuture = moment().add(1, "months");
 
-    this.drawChart();
-    this.changeYscale(20000);
+    let intervalSize = 20;
+    let numOfDays = dateFuture.diff(dateStart, "days");
+    let numOfDateCycles = Math.round(numOfDays / intervalSize);
 
-    for (let i = 1; i < intervalCount; i++) {
+    let dateMax = dateStart.clone().add(7, "days");
+    this.updateXscale(dateMax);
+
+    for (let i = 1; i < numOfDateCycles; i++) {
       setTimeout(() => {
-        this.changeYscale(i * 20000);
+        let dateMax = dateStart.clone().add(i * intervalSize, "days");
+        this.updateXscale(dateMax);
         this.drawChart();
+
+        const maxYValue = d3.max(this.props.data, (v) => {
+          return v.date >= this.scaleX.domain()[0] &&
+            v.date <= this.scaleX.domain()[1]
+            ? v.death
+            : null;
+        });
+
+        let roundedMax = Math.round(maxYValue * 1.4);
+        let minScaleValue = Math.max(10000, roundedMax);
+        this.changeYscale(minScaleValue);
       }, i * 2000);
     }
+
+    this.drawChart();
+    this.changeYscale(10000);
   }
 
   drawChart() {
@@ -234,6 +255,8 @@ export class Chart extends Component {
     }
 
     this.elmLineElection1
+      .transition()
+      .duration(500)
       .attr("x1", dateElection)
       .attr("y1", -50)
       .attr("x2", dateElection)
@@ -250,6 +273,8 @@ export class Chart extends Component {
     }
 
     this.elmLineElection2
+      .transition()
+      .duration(500)
       .attr("x1", dateElection)
       .attr("y1", height / 2 + 60)
       .attr("x2", dateElection)
@@ -266,6 +291,8 @@ export class Chart extends Component {
     }
 
     this.elmLineElectionText
+      .transition()
+      .duration(500)
       .attr("x", dateElection)
       .attr("dx", 0)
       .attr("y", height / 2)
@@ -286,6 +313,8 @@ export class Chart extends Component {
     }
 
     this.elmLineToday
+      .transition()
+      .duration(500)
       .attr("x1", dateToday)
       .attr("y1", -50)
       .attr("x2", dateToday)
