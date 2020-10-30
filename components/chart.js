@@ -1,8 +1,6 @@
 import React, { Component } from "react";
 import moment from "moment";
 import * as d3 from "d3";
-import * as d3Time from "d3-time-format";
-import { axisRight } from "d3";
 
 export class Chart extends Component {
   constructor(props) {
@@ -119,18 +117,16 @@ export class Chart extends Component {
       setTimeout(() => {
         let dateMax = dateStart.clone().add(i * intervalSize, "days");
         this.updateXscale(dateMax);
-        this.drawChart();
 
         const maxYValue = d3.max(this.props.data, (v) => {
-          return v.date >= this.scaleX.domain()[0] &&
-            v.date <= this.scaleX.domain()[1]
-            ? v.death
-            : null;
+          return moment(v.date).isSameOrBefore(dateMax) ? v.death : null;
         });
 
-        let roundedMax = Math.round(maxYValue * 1.4);
+        let roundedMax = Math.round(maxYValue * 1.2);
         let minScaleValue = Math.max(10000, roundedMax);
         this.changeYscale(minScaleValue);
+
+        this.drawChart();
       }, i * 2000);
     }
 
