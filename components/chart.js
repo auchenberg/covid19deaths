@@ -105,13 +105,15 @@ export class Chart extends Component {
 
     let dateStart = moment(new Date(2020, 1, 1));
     let dateFuture = moment().add(1, "months");
+    let dateMax = dateStart.clone().add(7, "days");
 
     let intervalSize = 20;
     let numOfDays = dateFuture.diff(dateStart, "days");
     let numOfDateCycles = Math.round(numOfDays / intervalSize);
 
-    let dateMax = dateStart.clone().add(7, "days");
     this.updateXscale(dateMax);
+    this.drawChart();
+    this.changeYscale(10000);
 
     for (let i = 1; i < numOfDateCycles; i++) {
       setTimeout(() => {
@@ -129,9 +131,6 @@ export class Chart extends Component {
         this.drawChart();
       }, i * 2000);
     }
-
-    this.drawChart();
-    this.changeYscale(10000);
   }
 
   drawChart() {
@@ -156,6 +155,7 @@ export class Chart extends Component {
 
     this.drawMilestones(isMobile, milestones, g);
   }
+
   drawLine(g, data) {
     var line = d3
       .line()
