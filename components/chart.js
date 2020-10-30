@@ -10,6 +10,7 @@ export class Chart extends Component {
     this.myRef = React.createRef();
     this.scaleY = null;
     this.scaleYMaxBound = 2000;
+    this.elmMilestones = [];
   }
 
   componentDidMount() {
@@ -38,6 +39,7 @@ export class Chart extends Component {
       .scaleLinear()
       .domain([0, maxScaleBound])
       .rangeRound([this.state.height, 0]);
+
     this.elmAxisY
       .transition()
       .duration(500)
@@ -50,13 +52,17 @@ export class Chart extends Component {
 
   drawYscale(g) {
     // Grab y axis g element
-    this.elmAxisY = g
-      .append("g")
-      .attr("id", "axis-y")
-      .attr("opacity", 0.75)
-      .attr("transform", "translate(" + this.state.width + ", 0)")
-      .style("font-size", "12px")
-      .style("font-family", "Roboto, Helvetica, sans-serif");
+
+    if (!this.elmAxisY) {
+      this.elmAxisY = g
+        .append("g")
+        .attr("id", "axis-y")
+        .attr("opacity", 0.75)
+        .style("font-size", "12px")
+        .style("font-family", "Roboto, Helvetica, sans-serif");
+    }
+
+    this.elmAxisY.attr("transform", "translate(" + this.state.width + ", 0)");
 
     this.changeYscale(this.scaleYMaxBound);
   }
@@ -70,11 +76,17 @@ export class Chart extends Component {
       .rangeRound([0, this.state.width])
       .nice();
 
-    g.append("g")
-      .attr("class", "axis-x")
-      .attr("opacity", 0.75)
+    if (!this.elmAxisX) {
+      this.elmAxisX = g
+        .append("g")
+        .attr("class", "axis-x")
+        .attr("opacity", 0.75)
+        .style("font-family", "Roboto, Helvetica, sans-serif")
+        .style("font-size", "12px");
+    }
+
+    this.elmAxisX
       .attr("transform", "translate(0," + this.state.height + ")")
-      .style("font-family", "Roboto, Helvetica, sans-serif")
       .transition()
       .duration(500)
       .call(
@@ -83,8 +95,7 @@ export class Chart extends Component {
             ? moment(d).format("MMM")
             : moment(d).format("MMM YYYY");
         })
-      )
-      .style("font-size", "12px");
+      );
   }
 
   draw() {
@@ -92,25 +103,18 @@ export class Chart extends Component {
       return;
     }
 
-    this.scaleYMaxBound = d3.max(this.props.data, (d) => d.death) * 1.5;
+    let maxScaleValue = d3.max(this.props.data, (d) => d.death) * 1.5;
+    let intervalCount = Math.round(maxScaleValue / 20000);
+
     this.drawChart();
+    this.changeYscale(20000);
 
-    // setTimeout(() => {
-    //   this.changeYscale(80000);
-    //   this.drawChart();
-    // }, 2000);
-
-    // setTimeout(() => {
-    //   this.changeYscale(100000);
-    //   this.drawChart();
-    // }, 4000);
-
-    // setTimeout(() => {
-    //   let currentMax = d3.max(this.props.data, (d) => d.death);
-
-    //   this.changeYscale(currentMax);
-    //   this.drawChart();
-    // }, 6000);
+    for (let i = 1; i < intervalCount; i++) {
+      setTimeout(() => {
+        this.changeYscale(i * 20000);
+        this.drawChart();
+      }, i * 2000);
+    }
   }
 
   drawChart() {
@@ -145,113 +149,147 @@ export class Chart extends Component {
         return this.scaleY(d.death);
       });
 
-    g.append("path")
-      .datum(data)
-      .transition()
-      .duration(500)
-      .attr("fill", "none")
-      .attr("stroke", "#cf1110")
-      .attr("stroke-linejoin", "round")
-      .attr("stroke-linecap", "round")
-      .attr("stroke-width", 3)
-      .attr("d", line);
+    if (!this.elmLine) {
+      this.elmLine = g
+        .append("path")
+        .attr("fill", "none")
+        .attr("stroke", "#cf1110")
+        .attr("stroke-linejoin", "round")
+        .attr("stroke-linecap", "round")
+        .attr("stroke-width", 3);
+    }
+
+    this.elmLine.datum(data).transition().duration(500).attr("d", line);
   }
 
   drawMilestones(isMobile, milestones, g) {
     let milestoneLeftMargin = isMobile ? 20 : 60;
 
-    milestones.forEach((m) => {
-      g.append("text")
+    milestones.forEach((m, index) => {
+      this.elmMilestones[index] = this.elmMilestones[index] || {};
+
+      if (!this.elmMilestones[index].text) {
+        this.elmMilestones[index].text = g
+          .append("text")
+          .attr("opacity", 0.4)
+          .attr("fill", "#000")
+          .attr("text-anchor", "left")
+          .style("font-size", "12px")
+          .style("font-family", "Roboto, Helvetica, sans-serif")
+          .text(m.name);
+      }
+
+      this.elmMilestones[index].text
         .transition()
         .duration(500)
         .attr("x", milestoneLeftMargin)
         .attr("dx", 0)
         .attr("y", this.scaleY(m.death))
-        .attr("dy", -5)
-        .attr("opacity", 0.4)
-        .attr("fill", "#000")
-        .attr("text-anchor", "left")
-        .style("font-size", "12px")
-        .style("font-family", "Roboto, Helvetica, sans-serif")
-        .text(m.name);
+        .attr("dy", -5);
 
-      g.append("line")
+      if (!this.elmMilestones[index].line) {
+        this.elmMilestones[index].line = g
+          .append("line")
+          .style("stroke-dasharray", "2, 3")
+          .style("stroke-width", 0.5)
+          .attr("opacity", 0.4)
+          .style("stroke", "#000")
+          .style("fill", "none");
+      }
+
+      this.elmMilestones[index].line
         .transition()
         .duration(500)
         .attr("x1", 0)
         .attr("x2", this.scaleX(this.scaleX.domain()[1]))
         .attr("y1", this.scaleY(m.death))
-        .attr("y2", this.scaleY(m.death))
-        .style("stroke-dasharray", "2, 3")
-        .style("stroke-width", 0.5)
-        .attr("opacity", 0.4)
-        .style("stroke", "#000")
-        .style("fill", "none");
+        .attr("y2", this.scaleY(m.death));
 
-      g.append("circle")
+      if (!this.elmMilestones[index].circle) {
+        this.elmMilestones[index].circle = g
+          .append("circle")
+          .attr("r", 3)
+          .style("fill", "#ff5722");
+      }
+
+      this.elmMilestones[index].circle
+        .transition()
+        .duration(500)
         .attr("cx", 0)
-        .attr("cy", this.scaleY(m.death))
-        .attr("r", 3)
-        .style("fill", "#ff5722");
+        .attr("cy", this.scaleY(m.death));
     });
   }
 
   drawElectionLine(g, height) {
     let dateElection = this.scaleX(moment("2020-11-03"));
-    g.append("line")
-      .transition()
-      .duration(500)
+
+    if (!this.elmLineElection1) {
+      this.elmLineElection1 = g
+        .append("line")
+        .attr("opacity", 0.4)
+        .style("stroke-dasharray", "3, 3")
+        .style("stroke-width", 1.5)
+        .style("stroke", "#000")
+        .style("fill", "none");
+    }
+
+    this.elmLineElection1
       .attr("x1", dateElection)
       .attr("y1", -50)
       .attr("x2", dateElection)
-      .attr("y2", height / 2 - 60)
-      .attr("opacity", 0.4)
-      .style("stroke-dasharray", "3, 3")
-      .style("stroke-width", 1.5)
-      .style("stroke", "#000")
-      .style("fill", "none");
+      .attr("y2", height / 2 - 60);
 
-    g.append("line")
-      .transition()
-      .duration(500)
+    if (!this.elmLineElection2) {
+      this.elmLineElection2 = g
+        .append("line")
+        .attr("opacity", 0.4)
+        .style("stroke-dasharray", "3, 3")
+        .style("stroke-width", 1.5)
+        .style("stroke", "#000")
+        .style("fill", "none");
+    }
+
+    this.elmLineElection2
       .attr("x1", dateElection)
       .attr("y1", height / 2 + 60)
       .attr("x2", dateElection)
-      .attr("y2", height)
-      .attr("opacity", 0.4)
-      .style("stroke-dasharray", "3, 3")
-      .style("stroke-width", 1.5)
-      .style("stroke", "#000")
-      .style("fill", "none");
+      .attr("y2", height);
 
-    g.append("text")
+    if (!this.elmLineElectionText) {
+      this.elmLineElectionText = g
+        .append("text")
+        .attr("fill", "#000")
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .style("font-family", "Roboto, Helvetica, sans-serif")
+        .text("US Election 2020");
+    }
 
+    this.elmLineElectionText
       .attr("x", dateElection)
       .attr("dx", 0)
       .attr("y", height / 2)
       .attr("dy", 4)
       .attr("opacity", 0.4)
-      .attr("transform", "rotate(90," + dateElection + "," + height / 2 + ")")
-      .attr("fill", "#000")
-      .attr("text-anchor", "middle")
-      .style("font-size", "12px")
-      .style("font-family", "Roboto, Helvetica, sans-serif")
-      .text("US Election 2020");
+      .attr("transform", "rotate(90," + dateElection + "," + height / 2 + ")");
   }
 
   drawTodayLine(g, height) {
     let dateToday = this.scaleX(moment().seconds(0).minutes(0).hours(0));
-    g.append("line")
-      .transition()
-      .duration(500)
+    if (!this.elmLineToday) {
+      this.elmLineToday = g
+        .append("line")
+        .style("stroke-dasharray", "3, 3")
+        .style("stroke-width", 1.5)
+        .style("stroke", "#ff5722")
+        .style("fill", "none");
+    }
+
+    this.elmLineToday
       .attr("x1", dateToday)
       .attr("y1", -50)
       .attr("x2", dateToday)
-      .attr("y2", height)
-      .style("stroke-dasharray", "3, 3")
-      .style("stroke-width", 1.5)
-      .style("stroke", "#ff5722")
-      .style("fill", "none");
+      .attr("y2", height);
   }
 
   drawArea(g, data) {
@@ -266,16 +304,18 @@ export class Chart extends Component {
       .y1((d) => {
         return this.scaleY(d.death);
       });
-    g.append("path")
-      .datum(data)
-      .transition()
-      .duration(500)
-      .attr("fill", "#fbe9e7")
-      .attr("opacity", 0.5)
-      .attr("stroke-linejoin", "round")
-      .attr("stroke-linecap", "round")
-      .attr("stroke-width", 7)
-      .attr("d", area);
+
+    if (!this.elmArea) {
+      this.elmArea = g
+        .append("path")
+        .attr("fill", "#fbe9e7")
+        .attr("opacity", 0.5)
+        .attr("stroke-linejoin", "round")
+        .attr("stroke-linecap", "round")
+        .attr("stroke-width", 7);
+    }
+
+    this.elmArea.datum(data).transition().duration(500).attr("d", area);
   }
 
   render() {
