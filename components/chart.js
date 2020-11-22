@@ -33,12 +33,7 @@ export class Chart extends Component {
 
     console.log("changeYscale", maxScaleBound);
 
-    this.scaleYMaxBound = maxScaleBound;
-
-    this.scaleY = d3
-      .scaleLinear()
-      .domain([0, maxScaleBound])
-      .rangeRound([this.state.height, 0]);
+    this.updateYscale(maxScaleBound);
 
     this.elmAxisY
       .transition()
@@ -48,6 +43,14 @@ export class Chart extends Component {
           return format(d);
         })
       );
+  }
+
+  updateYscale(maxScaleBound) {
+    this.scaleYMaxBound = maxScaleBound;
+    this.scaleY = d3
+      .scaleLinear()
+      .domain([0, maxScaleBound])
+      .rangeRound([this.state.height, 0]);
   }
 
   drawYscale(g) {
@@ -107,30 +110,35 @@ export class Chart extends Component {
     let dateFuture = moment().add(1, "months");
     let dateMax = dateStart.clone().add(7, "days");
 
-    let intervalSize = 20;
-    let numOfDays = dateFuture.diff(dateStart, "days");
-    let numOfDateCycles = Math.round(numOfDays / intervalSize);
+    const maxYValue =
+      d3.max(this.props.data, (v) => {
+        return v.death;
+      }) * 1.3;
 
-    this.updateXscale(dateMax);
+    this.updateXscale(dateFuture);
+    this.updateYscale(maxYValue);
     this.drawChart();
-    this.changeYscale(10000);
 
-    for (let i = 1; i < numOfDateCycles; i++) {
-      setTimeout(() => {
-        let dateMax = dateStart.clone().add(i * intervalSize, "days");
-        this.updateXscale(dateMax);
+    // // Animation
+    // let intervalSize = 20;
+    // let numOfDays = dateFuture.diff(dateStart, "days");
+    // let numOfDateCycles = Math.round(numOfDays / intervalSize);
+    // for (let i = 1; i < numOfDateCycles; i++) {
+    //   setTimeout(() => {
+    //     let dateMax = dateStart.clone().add(i * intervalSize, "days");
+    //     this.updateXscale(dateMax);
 
-        const maxYValue = d3.max(this.props.data, (v) => {
-          return moment(v.date).isSameOrBefore(dateMax) ? v.death : null;
-        });
+    //     const maxYValue = d3.max(this.props.data, (v) => {
+    //       return moment(v.date).isSameOrBefore(dateMax) ? v.death : null;
+    //     });
 
-        let roundedMax = Math.round(maxYValue * 1.2);
-        let minScaleValue = Math.max(10000, roundedMax);
-        this.changeYscale(minScaleValue);
+    //     let roundedMax = Math.round(maxYValue * 1.2);
+    //     let minScaleValue = Math.max(5000, roundedMax);
+    //     this.changeYscale(minScaleValue);
 
-        this.drawChart();
-      }, i * 2000);
-    }
+    //     this.drawChart();
+    //   }, i * 2000);
+    // }
   }
 
   drawChart() {
@@ -337,10 +345,69 @@ export class Chart extends Component {
         .attr("opacity", 0.5)
         .attr("stroke-linejoin", "round")
         .attr("stroke-linecap", "round")
-        .attr("stroke-width", 7);
+        .attr("stroke-width", 7)
+        .on("mouseover", this.onMouseOver.bind(this))
+        .on("mousemove", this.onMouseMove.bind(this))
+        .on("mouseout", this.onMouseOut.bind(this));
+    }
+
+    if (!this.elmTooltipCircle) {
+      this.elmTooltipCircle = g
+        .append("g")
+        .append("circle")
+        .style("fill", "none")
+        .attr("stroke", "black")
+        .attr("r", 8.5)
+        .style("opacity", 0);
+    }
+
+    if (!this.elmTooltipText) {
+      this.elmTooltipText = g
+        .append("g")
+        .append("text")
+        .style("opacity", 0)
+        .attr("text-anchor", "left")
+        .attr("alignment-baseline", "middle");
     }
 
     this.elmArea.datum(data).transition().duration(500).attr("d", area);
+  }
+
+  onMouseOver() {
+    this.elmTooltipCircle.style("opacity", 1);
+    this.elmTooltipText.style("opacity", 1);
+  }
+
+  onMouseMove(e) {
+    var bisect = d3.bisector((d) => d.date).left;
+
+    // recover coordinate we need
+    let pointerData = d3.pointer(e);
+    var x0 = this.scaleX.invert(pointerData[0]);
+    console.log("x0", x0);
+
+    var i = bisect(this.props.data, x0);
+    let selectedData = this.props.data[i];
+
+    console.log("index", i, this.props.data);
+
+    if (!selectedData) {
+      return;
+    }
+
+    this.elmTooltipCircle
+      .attr("cx", this.scaleX(selectedData.x))
+      .attr("cy", this.scaleY(selectedData.y));
+
+    this.elmTooltipText
+      .html("x:" + selectedData.x + "  -  " + "y:" + selectedData.y)
+      .attr("x", this.scaleX(selectedData.x) + 15)
+      .attr("y", this.scaleY(selectedData.y));
+  }
+
+  onMouseOut() {
+    this.elmTooltipCircle.style("opacity", 0);
+    this.elmTooltipText.style("opacity", 0);
   }
 
   render() {
