@@ -67,6 +67,10 @@ export default class Page extends Component {
         d.date = parseDate(d.date);
       });
 
+      data.sort(function (a, b) {
+        return a.date - b.date;
+      });
+
       let mostRecentItem = data.slice(0)[0];
 
       this.setState({
