@@ -31,8 +31,6 @@ export class Chart extends Component {
   changeYscale(maxScaleBound) {
     var format = d3.format(",");
 
-    console.log("changeYscale", maxScaleBound);
-
     this.updateYscale(maxScaleBound);
 
     this.elmAxisY
