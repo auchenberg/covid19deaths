@@ -11,40 +11,40 @@ export default class Page extends Component {
     data: null,
     milestones: [
       {
-        name: "2009 H1N1 Pandemic (1 year)",
+        name: "2009 H1N1 Pandemic (took 1 year)",
         death: 12469, // https://www.cdc.gov/flu/pandemic-resources/2009-h1n1-pandemic.html
       },
       {
-        name: "Korean War (3 years)",
+        name: "Korean War (took 3 years)",
         death: 36516, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
       },
       {
-        name: "Vietnam War (20 years)",
+        name: "Vietnam War (took 20 years)",
         death: 58209, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
       },
       {
-        name: "1968 Pandemic H3N2 virus (1 year)",
+        name: "1968 Pandemic H3N2 virus (took 1 year)",
         death: 100000, // https://www.cdc.gov/flu/pandemic-resources/1957-1958-pandemic.html
       },
       {
-        name: "World War I (4 years)",
+        name: "World War I (took 4 years)",
         death: 116516, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
       },
       {
-        name: "Civil War - U.S. Army (4 years)",
-        death: 364511, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
-      },
-      {
-        name: "Civil War - Confederate Army (4 years)",
+        name: "Civil War - Confederate Army (took 4 years)",
         death: 290000, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
       },
       {
-        name: "World War II (4 years)",
+        name: "Civil War - U.S. Army (took 4 years)",
+        death: 364511, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
+      },
+      {
+        name: "World War II (took 4 years)",
         death: 405399, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
       },
 
       {
-        name: "1918 Pandemic H1N1 virus (1 year)",
+        name: "1918 Pandemic H1N1 virus (took 1 year)",
         death: 675000, // https://www.cdc.gov/flu/pandemic-resources/1918-pandemic-h1n1.html
       },
       {
@@ -99,11 +99,11 @@ export default class Page extends Component {
           <div>
             {this.state.data && (
               <>
-                <p>
+                {/* <p>
                   The United States of America has so far had{" "}
                   <strong>{formattedDeathCount}</strong> deaths due to COVID-19.
-                </p>
-                <p>
+                </p> */}
+                <p className="small">
                   Last updated on <strong>{formattedDate}</strong>.
                 </p>
                 <p className="small">
