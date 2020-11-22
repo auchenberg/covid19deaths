@@ -71,7 +71,7 @@ export default class Page extends Component {
         return a.date - b.date;
       });
 
-      let mostRecentItem = data.slice(0)[0];
+      let mostRecentItem = data[data.length - 1];
 
       this.setState({
         data: data,
