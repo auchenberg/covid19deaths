@@ -237,10 +237,22 @@ export class Chart extends Component {
           .style("fill", "#ff5722");
       }
 
+      // Bisect date from death count
+      var bisectDeath = d3.bisector((d) => {
+        return d.death;
+      }).left;
+
+      let i = bisectDeath(this.props.data, m.death);
+      var d0 = this.props.data[i - 1];
+
+      if (!d0) {
+        return;
+      }
+
       this.elmMilestones[index].circle
         .transition()
         .duration(500)
-        .attr("cx", 0)
+        .attr("cx", this.scaleX(d0.date))
         .attr("cy", this.scaleY(m.death));
     });
   }
@@ -355,9 +367,8 @@ export class Chart extends Component {
       this.elmTooltipCircle = g
         .append("g")
         .append("circle")
-        .style("fill", "none")
-        .attr("stroke", "black")
-        .attr("r", 8.5)
+        .attr("fill", "red")
+        .attr("r", 3)
         .style("opacity", 0);
     }
 
@@ -367,6 +378,8 @@ export class Chart extends Component {
         .append("text")
         .style("opacity", 0)
         .attr("text-anchor", "left")
+        .style("font-size", "12px")
+        .style("font-family", "Roboto, Helvetica, sans-serif")
         .attr("alignment-baseline", "middle");
     }
 
@@ -379,30 +392,35 @@ export class Chart extends Component {
   }
 
   onMouseMove(e) {
-    var bisect = d3.bisector((d) => d.date).left;
+    var bisectDate = d3.bisector((d) => {
+      return d.date;
+    }).left;
 
     // recover coordinate we need
     let pointerData = d3.pointer(e);
-    var x0 = this.scaleX.invert(pointerData[0]);
-    console.log("x0", x0);
+    var mouseDate = this.scaleX.invert(pointerData[0]);
 
-    var i = bisect(this.props.data, x0);
-    let selectedData = this.props.data[i];
+    let i = bisectDate(this.props.data, mouseDate);
+    var d0 = this.props.data[i - 1];
+    var d1 = this.props.data[i];
+    // work out which date value is closest to the mouse
+    var d = mouseDate - d0[0] > d1[0] - mouseDate ? d1 : d0;
 
-    console.log("index", i, this.props.data);
-
-    if (!selectedData) {
+    if (!d) {
       return;
     }
 
-    this.elmTooltipCircle
-      .attr("cx", this.scaleX(selectedData.x))
-      .attr("cy", this.scaleY(selectedData.y));
+    var x = this.scaleX(d.date);
+    var y = this.scaleY(d.death);
+
+    this.elmTooltipCircle.attr("cx", x).attr("cy", y);
+
+    let formattedDeathCount = new Intl.NumberFormat().format(d.death);
 
     this.elmTooltipText
-      .html("x:" + selectedData.x + "  -  " + "y:" + selectedData.y)
-      .attr("x", this.scaleX(selectedData.x) + 15)
-      .attr("y", this.scaleY(selectedData.y));
+      .html(`${formattedDeathCount} deaths`)
+      .attr("x", x + 15)
+      .attr("y", y);
   }
 
   onMouseOut() {
