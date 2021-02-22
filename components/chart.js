@@ -251,7 +251,10 @@ export class Chart extends Component {
         .transition()
         .duration(500)
         .attr("cx", this.scaleX(d0.date))
-        .attr("cy", this.scaleY(m.death));
+        .attr("cy", this.scaleY(m.death))
+        .on("mouseover", this.onMouseOver.bind(this))
+        .on("mousemove", this.onMouseMove.bind(this))
+        .on("mouseout", this.onMouseOut.bind(this));      
     });
   }
 
