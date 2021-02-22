@@ -103,10 +103,10 @@ export default class Page extends Component {
           <div>
             {this.state.data && (
               <>
-                {/* <p>
+                <p>
                   The United States of America has so far had{" "}
                   <strong>{formattedDeathCount}</strong> deaths due to COVID-19.
-                </p> */}
+                </p>
                 <p className="small">
                   Last updated on <strong>{formattedDate}</strong>.
                 </p>
