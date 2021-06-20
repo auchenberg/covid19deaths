@@ -12,44 +12,40 @@ export default class Page extends Component {
     milestones: [
       {
         name: "2009 H1N1 Pandemic (took 1 year)",
-        death: 12469, // https://www.cdc.gov/flu/pandemic-resources/2009-h1n1-pandemic.html
+        deaths: 12469, // https://www.cdc.gov/flu/pandemic-resources/2009-h1n1-pandemic.html
       },
       {
         name: "Korean War (took 3 years)",
-        death: 36516, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
+        deaths: 36516, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
       },
       {
         name: "Vietnam War (took 20 years)",
-        death: 58209, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
+        deaths: 58209, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
       },
       {
         name: "1968 Pandemic H3N2 virus (took 1 year)",
-        death: 100000, // https://www.cdc.gov/flu/pandemic-resources/1957-1958-pandemic.html
+        deaths: 100000, // https://www.cdc.gov/flu/pandemic-resources/1957-1958-pandemic.html
       },
       {
         name: "World War I (took 4 years)",
-        death: 116516, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
+        deaths: 116516, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
       },
       {
         name: "Civil War - Confederate Army (took 4 years)",
-        death: 290000, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
+        deaths: 290000, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
       },
       {
         name: "Civil War - U.S. Army (took 4 years)",
-        death: 364511, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
+        deaths: 364511, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
       },
       {
         name: "World War II (took 4 years)",
-        death: 405399, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
+        deaths: 405399, // https://en.wikipedia.org/wiki/United_States_military_casualties_of_war
       },
 
       {
         name: "1918 Pandemic H1N1 virus (took 1 year)",
-        death: 675000, // https://www.cdc.gov/flu/pandemic-resources/1918-pandemic-h1n1.html
-      },
-      {
-        name: "AIDS",
-        death: 700000,
+        deaths: 675000, // https://www.cdc.gov/flu/pandemic-resources/1918-pandemic-h1n1.html
       },
     ],
   };
