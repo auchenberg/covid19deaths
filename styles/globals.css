@@ -24,6 +24,8 @@ body {
 
   position: fixed;
   z-index: 200;
+
+  opacity: 0;
 }
 
 .chart-wrapper {
