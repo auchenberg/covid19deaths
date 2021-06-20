@@ -59,12 +59,15 @@ export default class Page extends Component {
   }
 
   fetchData() {
-    d3.json("https://api.covidtracking.com/v1/us/daily.json").then((data) => {
+    d3.csv(
+      "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv"
+    ).then((data) => {
       // Format data
-      var parseDate = d3.timeParse("%Y%m%d"); // Json is formatted like 20201016
+      var parseDate = d3.timeParse("%Y-%m-%d"); // Json is formatted like 20201016
 
       data.forEach(function (d) {
         d.date = parseDate(d.date);
+        d.deaths = parseInt(d.deaths, 10);
       });
 
       data.sort(function (a, b) {
@@ -82,7 +85,7 @@ export default class Page extends Component {
 
   render() {
     let formattedDeathCount = this.state.mostRecent
-      ? new Intl.NumberFormat().format(this.state.mostRecent.death)
+      ? new Intl.NumberFormat().format(this.state.mostRecent.deaths)
       : 0;
 
     let formattedDate = this.state.mostRecent

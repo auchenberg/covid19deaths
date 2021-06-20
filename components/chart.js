@@ -110,7 +110,7 @@ export class Chart extends Component {
 
     const maxYValue =
       d3.max(this.props.data, (v) => {
-        return v.death;
+        return v.deaths;
       }) * 1.3;
 
     this.updateXscale(dateFuture);
@@ -169,7 +169,7 @@ export class Chart extends Component {
         return this.scaleX(d.date);
       })
       .y((d) => {
-        return this.scaleY(d.death);
+        return this.scaleY(d.deaths);
       });
 
     if (!this.elmLine) {
@@ -207,7 +207,7 @@ export class Chart extends Component {
         .duration(500)
         .attr("x", milestoneLeftMargin)
         .attr("dx", 0)
-        .attr("y", this.scaleY(m.death))
+        .attr("y", this.scaleY(m.deaths))
         .attr("dy", -5);
 
       if (!this.elmMilestones[index].line) {
@@ -225,8 +225,8 @@ export class Chart extends Component {
         .duration(500)
         .attr("x1", 0)
         .attr("x2", this.scaleX(this.scaleX.domain()[1]))
-        .attr("y1", this.scaleY(m.death))
-        .attr("y2", this.scaleY(m.death));
+        .attr("y1", this.scaleY(m.deaths))
+        .attr("y2", this.scaleY(m.deaths));
 
       if (!this.elmMilestones[index].circle) {
         this.elmMilestones[index].circle = g
@@ -237,10 +237,10 @@ export class Chart extends Component {
 
       // Bisect date from death count
       var bisectDeath = d3.bisector((d) => {
-        return d.death;
+        return d.deaths;
       }).left;
 
-      let i = bisectDeath(this.props.data, m.death);
+      let i = bisectDeath(this.props.data, m.deaths);
       var d0 = this.props.data[i - 1];
 
       if (!d0) {
@@ -251,7 +251,7 @@ export class Chart extends Component {
         .transition()
         .duration(500)
         .attr("cx", this.scaleX(d0.date))
-        .attr("cy", this.scaleY(m.death));
+        .attr("cy", this.scaleY(m.deaths));
     });
   }
 
@@ -345,7 +345,7 @@ export class Chart extends Component {
         return this.scaleY(0);
       })
       .y1((d) => {
-        return this.scaleY(d.death);
+        return this.scaleY(d.deaths);
       });
 
     if (!this.elmArea) {
@@ -409,11 +409,11 @@ export class Chart extends Component {
     }
 
     var x = this.scaleX(d.date);
-    var y = this.scaleY(d.death);
+    var y = this.scaleY(d.deaths);
 
     this.elmTooltipCircle.attr("cx", x).attr("cy", y);
 
-    let formattedDeathCount = new Intl.NumberFormat().format(d.death);
+    let formattedDeathCount = new Intl.NumberFormat().format(d.deaths);
 
     this.elmTooltipText
       .html(`${formattedDeathCount} deaths`)
